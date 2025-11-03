@@ -1,0 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f3f4f6;
+}
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    #invoice-container, #invoice-container * {
+        visibility: visible;
+    }
+    #invoice-container {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border: none !important;
+    }
+    .no-print {
+        display: none !important;
+    }
+}
