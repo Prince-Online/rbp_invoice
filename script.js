@@ -1,145 +1,173 @@
-function generateInvoiceNumber() {
-    const date = new Date();
-    const year = date.getFullYear().toString().slice(-2);
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date.getDate().toString().padStart(2, '0');
-    const uniqueID = Math.random().toString(36).substring(2, 6).toUpperCase();
-    return `${year}${month}${day}-${uniqueID}`;
-}
+let products = [];
+let productCounter = 0;
 
-const productRowsContainer = document.getElementById('product-rows');
-const inputForm = document.getElementById('input-form');
-const invoiceContainer = document.getElementById('invoice-container');
-const downloadBtnWrapper = document.getElementById('download-btn-wrapper');
-
-window.onload = () => {
-    addProductRow();
-    document.getElementById('shopLogo').src = SHOP_CONFIG.LOGO_URL;
-    document.getElementById('shopNameDisplay').textContent = SHOP_CONFIG.SHOP_NAME;
-    document.getElementById('shopSignatureName').textContent = SHOP_CONFIG.SHOP_NAME;
-};
-
-function calculateTotals() {
-    let subtotal = 0;
-    const productRows = productRowsContainer.querySelectorAll('.product-row');
-    productRows.forEach(row => {
-        const qtyInput = row.querySelector('.product-qty');
-        const priceInput = row.querySelector('.product-price');
-        const totalDisplay = row.querySelector('.product-row-total');
-        const qty = parseFloat(qtyInput.value) || 0;
-        const price = parseFloat(priceInput.value) || 0;
-        const rowTotal = qty * price;
-        totalDisplay.textContent = rowTotal.toFixed(2);
-        subtotal += rowTotal;
-    });
-    const grandTotal = subtotal;
-    document.getElementById('invoiceSubtotal').textContent = '₹' + subtotal.toFixed(2);
-    document.getElementById('invoiceGrandTotal').textContent = '₹' + grandTotal.toFixed(2);
-}
-
-function addProductRow() {
-    const rowCount = productRowsContainer.children.length + 1;
-    const row = document.createElement('div');
-    row.className = 'product-row grid grid-cols-4 md:grid-cols-7 gap-4 items-center bg-gray-50 p-3 rounded-lg border border-gray-200';
-    row.innerHTML = `
-        <div class="col-span-4 md:col-span-3">
-            <input type="text" placeholder="Product Name (S No. ${rowCount})" class="product-name w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" required>
-        </div>
-        <div class="col-span-2 md:col-span-1">
-            <input type="number" min="0.01" step="0.01" placeholder="Price" class="product-price w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" oninput="calculateTotals()" required>
-        </div>
-        <div class="col-span-2 md:col-span-1">
-            <input type="number" min="1" step="1" value="1" placeholder="Qty" class="product-qty w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" oninput="calculateTotals()" required>
-        </div>
-        <div class="col-span-3 md:col-span-1 text-right font-semibold text-gray-700">
-            ₹<span class="product-row-total">0.00</span>
-        </div>
-        <div class="col-span-1 md:col-span-1 flex justify-center">
-            <button onclick="removeProductRow(this)" class="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition duration-150 shadow-md">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3"></path></svg>
-            </button>
+function addProduct() {
+    productCounter++;
+    const productDiv = document.createElement('div');
+    productDiv.className = 'product-item';
+    productDiv.id = `product-${productCounter}`;
+    
+    productDiv.innerHTML = `
+        <div class="product-inputs">
+            <input type="text" placeholder="Product Name" class="product-name">
+            <input type="number" placeholder="Qty" class="product-qty" value="1" min="1" onchange="updateProductTotal(${productCounter})">
+            <input type="number" placeholder="Price" class="product-price" value="0" min="0" step="0.01" onchange="updateProductTotal(${productCounter})">
+            <div class="product-total" id="total-${productCounter}">₹0.00</div>
+            <button class="btn-remove" onclick="removeProduct(${productCounter})">Remove</button>
         </div>
     `;
-    productRowsContainer.appendChild(row);
-    calculateTotals();
+    
+    document.getElementById('productsList').appendChild(productDiv);
 }
 
-function removeProductRow(button) {
-    if (productRowsContainer.children.length > 1) {
-        button.closest('.product-row').remove();
-        calculateTotals();
-        const productRows = productRowsContainer.querySelectorAll('.product-row');
-        productRows.forEach((row, index) => {
-            row.querySelector('.product-name').placeholder = `Product Name (S No. ${index + 1})`;
-        });
-    }
+function updateProductTotal(id) {
+    const productDiv = document.getElementById(`product-${id}`);
+    const qty = parseFloat(productDiv.querySelector('.product-qty').value) || 0;
+    const price = parseFloat(productDiv.querySelector('.product-price').value) || 0;
+    const total = qty * price;
+    document.getElementById(`total-${id}`).textContent = `₹${total.toFixed(2)}`;
+}
+
+function removeProduct(id) {
+    const productDiv = document.getElementById(`product-${id}`);
+    productDiv.remove();
+}
+
+function toggleTax() {
+    const taxRow = document.getElementById('taxRow');
+    const isChecked = document.getElementById('taxCheckbox').checked;
+    taxRow.style.display = isChecked ? 'flex' : 'none';
 }
 
 function generateInvoice() {
     const customerName = document.getElementById('customerName').value;
     const customerAddress = document.getElementById('customerAddress').value;
-    if (!customerName || !customerAddress || productRowsContainer.children.length === 0) {
-        const messageBox = document.createElement('div');
-        messageBox.textContent = "Please enter customer details and at least one product.";
-        messageBox.className = "fixed top-4 right-4 bg-red-500 text-white p-4 rounded-lg shadow-xl z-50 transition-opacity duration-300";
-        document.body.appendChild(messageBox);
-        setTimeout(() => messageBox.remove(), 3000);
+    
+    if (!customerName || !customerAddress) {
+        alert('Please fill in customer name and address');
         return;
     }
+    
+    const productItems = document.querySelectorAll('.product-item');
+    if (productItems.length === 0) {
+        alert('Please add at least one product');
+        return;
+    }
+    
+    products = [];
+    productItems.forEach((item, index) => {
+        const name = item.querySelector('.product-name').value;
+        const qty = parseFloat(item.querySelector('.product-qty').value) || 0;
+        const price = parseFloat(item.querySelector('.product-price').value) || 0;
+        
+        if (name && qty > 0 && price >= 0) {
+            products.push({
+                sno: index + 1,
+                name: name,
+                qty: qty,
+                price: price,
+                total: qty * price
+            });
+        }
+    });
+    
+    if (products.length === 0) {
+        alert('Please fill in all product details');
+        return;
+    }
+    
+    document.getElementById('shopLogo').src = SHOP_CONFIG.logoUrl;
+    document.getElementById('shopName').textContent = SHOP_CONFIG.name;
     document.getElementById('invoiceCustomerName').textContent = customerName;
     document.getElementById('invoiceCustomerAddress').textContent = customerAddress;
-    document.getElementById('invoiceNumber').textContent = generateInvoiceNumber();
-    document.getElementById('invoiceDate').textContent = new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' });
-    const invoiceProductList = document.getElementById('invoice-product-list');
-    invoiceProductList.innerHTML = '';
-    let subtotal = 0;
-    const productRows = productRowsContainer.querySelectorAll('.product-row');
-    productRows.forEach((row, index) => {
-        const name = row.querySelector('.product-name').value || 'N/A';
-        const price = parseFloat(row.querySelector('.product-price').value) || 0;
-        const qty = parseFloat(row.querySelector('.product-qty').value) || 0;
-        const rowTotal = price * qty;
-        subtotal += rowTotal;
-        const newRow = document.createElement('tr');
-        newRow.className = 'hover:bg-gray-50';
-        newRow.innerHTML = `
-            <td class="px-3 py-3 whitespace-nowrap text-center text-sm font-medium text-gray-500">${index + 1}</td>
-            <td class="px-6 py-3 whitespace-wrap text-sm font-medium text-gray-900">${name}</td>
-            <td class="px-6 py-3 whitespace-nowrap text-right text-sm text-gray-700">${qty}</td>
-            <td class="px-6 py-3 whitespace-nowrap text-right text-sm text-gray-700">₹${price.toFixed(2)}</td>
-            <td class="px-6 py-3 whitespace-nowrap text-right text-sm font-bold text-gray-800">₹${rowTotal.toFixed(2)}</td>
-        `;
-        invoiceProductList.appendChild(newRow);
+    
+    const invoiceNum = 'INV-' + Date.now().toString().slice(-8);
+    document.getElementById('invoiceNumber').textContent = invoiceNum;
+    
+    const today = new Date();
+    const dateStr = today.toLocaleDateString('en-IN', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
     });
-    const grandTotal = subtotal;
-    document.getElementById('invoiceSubtotal').textContent = '₹' + subtotal.toFixed(2);
-    document.getElementById('invoiceGrandTotal').textContent = '₹' + grandTotal.toFixed(2);
-    inputForm.classList.add('hidden');
-    invoiceContainer.classList.remove('hidden');
+    document.getElementById('invoiceDate').textContent = dateStr;
+    
+    const productsListHTML = products.map(p => `
+        <tr>
+            <td>${p.sno}</td>
+            <td>${p.name}</td>
+            <td>${p.qty}</td>
+            <td>₹${p.price.toFixed(2)}</td>
+            <td>₹${p.total.toFixed(2)}</td>
+        </tr>
+    `).join('');
+    document.getElementById('invoiceProductsList').innerHTML = productsListHTML;
+    
+    const subtotal = products.reduce((sum, p) => sum + p.total, 0);
+    document.getElementById('invoiceSubtotal').textContent = `₹${subtotal.toFixed(2)}`;
+    
+    const taxEnabled = document.getElementById('taxCheckbox').checked;
+    let total = subtotal;
+    
+    if (taxEnabled) {
+        const tax = subtotal * 0.18;
+        document.getElementById('invoiceTax').textContent = `₹${tax.toFixed(2)}`;
+        total = subtotal + tax;
+        document.getElementById('taxRow').style.display = 'flex';
+    } else {
+        document.getElementById('taxRow').style.display = 'none';
+    }
+    
+    document.getElementById('invoiceTotal').textContent = `₹${total.toFixed(2)}`;
+    
+    document.querySelector('.form-section').style.display = 'none';
+    document.getElementById('invoiceDisplay').style.display = 'block';
 }
 
-async function downloadPDF() {
-    downloadBtnWrapper.classList.add('hidden');
+async function downloadInvoice() {
+    const invoiceContent = document.getElementById('invoiceContent');
+    
+    const originalWidth = invoiceContent.style.width;
+    invoiceContent.style.width = '794px';
+    
+    const canvas = await html2canvas(invoiceContent, {
+        scale: 3,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        width: 794,
+        windowWidth: 794
+    });
+    
+    invoiceContent.style.width = originalWidth;
+    
+    const imgData = canvas.toDataURL('image/jpeg', 0.7);
+    
     const { jsPDF } = window.jspdf;
-    const element = document.getElementById('invoice-container');
-    const filename = `Invoice_${document.getElementById('invoiceNumber').textContent}.pdf`;
-    const options = { scale: 2, useCORS: true, logging: true };
-    const canvas = await html2canvas(element, options);
-    const imgData = canvas.toDataURL('image/jpeg', 1.0);
-    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+    });
+    
     const imgWidth = 210;
-    const pageHeight = 295;
-    const imgHeight = canvas.height * imgWidth / canvas.width;
-    let heightLeft = imgHeight;
-    let position = 0;
-    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-    while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-    }
-    pdf.save(filename);
-    downloadBtnWrapper.classList.remove('hidden');
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    
+    pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight, '', 'FAST');
+    
+    const invoiceNum = document.getElementById('invoiceNumber').textContent;
+    pdf.save(`Invoice-${invoiceNum}.pdf`);
 }
+
+function newInvoice() {
+    document.getElementById('customerName').value = '';
+    document.getElementById('customerAddress').value = '';
+    document.getElementById('productsList').innerHTML = '';
+    document.getElementById('taxCheckbox').checked = false;
+    productCounter = 0;
+    products = [];
+    
+    document.querySelector('.form-section').style.display = 'block';
+    document.getElementById('invoiceDisplay').style.display = 'none';
+}
+
+addProduct();
