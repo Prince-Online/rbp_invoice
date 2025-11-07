@@ -155,7 +155,21 @@ async function downloadInvoice() {
     pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight, '', 'FAST');
     
     const invoiceNum = document.getElementById('invoiceNumber').textContent;
-    pdf.save(`Invoice-${invoiceNum}.pdf`);
+    const pdfBlob = pdf.output('blob');
+    const pdfUrl = URL.createObjectURL(pdfBlob);
+    
+    const link = document.createElement('a');
+    link.href = pdfUrl;
+    link.download = `Invoice-${invoiceNum}.pdf`;
+    link.click();
+    
+    setTimeout(() => {
+        window.open(pdfUrl, '_blank');
+    }, 500);
+    
+    setTimeout(() => {
+        URL.revokeObjectURL(pdfUrl);
+    }, 2000);
 }
 
 function newInvoice() {
