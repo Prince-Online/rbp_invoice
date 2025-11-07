@@ -1,26 +1,362 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
-body {
-    font-family: 'Inter', sans-serif;
-    background-color: #f3f4f6;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
-@media print {
-    body * {
-        visibility: hidden;
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f5f5f5;
+    padding: 20px;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #333;
+}
+
+.header h1 {
+    color: #333;
+    font-size: 28px;
+}
+
+.form-section {
+    margin-bottom: 30px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #333;
+    font-weight: bold;
+}
+
+.form-group input[type="text"],
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.products-section {
+    margin: 30px 0;
+    padding: 20px;
+    background: #fafafa;
+    border-radius: 4px;
+}
+
+.products-section h3 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.product-item {
+    background: white;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    border: 1px solid #e0e0e0;
+}
+
+.product-inputs {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr auto;
+    gap: 10px;
+    align-items: center;
+}
+
+.product-inputs input {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.product-total {
+    font-weight: bold;
+    color: #333;
+    padding: 8px;
+}
+
+.btn-remove {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-remove:hover {
+    background: #c82333;
+}
+
+.btn-add {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    width: 100%;
+}
+
+.btn-add:hover {
+    background: #218838;
+}
+
+.btn-generate {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+}
+
+.btn-generate:hover {
+    background: #0056b3;
+}
+
+#invoiceDisplay {
+    margin-top: 30px;
+}
+
+#invoiceContent {
+    background: white;
+    padding: 40px;
+    margin-bottom: 20px;
+}
+
+.invoice-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+}
+
+.invoice-logo img {
+    max-width: 80px;
+    height: auto;
+}
+
+.invoice-shop-info {
+    text-align: right;
+}
+
+.invoice-shop-info h2 {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.invoice-title {
+    font-size: 20px;
+    color: #666;
+    font-weight: bold;
+}
+
+.invoice-details {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+}
+
+.invoice-customer {
+    flex: 1;
+}
+
+.invoice-customer strong {
+    display: block;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.invoice-meta {
+    text-align: right;
+}
+
+.invoice-meta div {
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.invoice-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+}
+
+.invoice-table thead {
+    background: #f8f9fa;
+}
+
+.invoice-table th,
+.invoice-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.invoice-table th {
+    font-weight: bold;
+    color: #333;
+}
+
+.invoice-table td {
+    color: #666;
+}
+
+.invoice-table th:last-child,
+.invoice-table td:last-child {
+    text-align: right;
+}
+
+.invoice-table th:nth-child(3),
+.invoice-table td:nth-child(3),
+.invoice-table th:nth-child(4),
+.invoice-table td:nth-child(4) {
+    text-align: center;
+}
+
+.invoice-summary {
+    margin-left: auto;
+    width: 300px;
+    margin-bottom: 30px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    color: #333;
+}
+
+.summary-total {
+    border-top: 2px solid #333;
+    font-weight: bold;
+    font-size: 18px;
+    margin-top: 10px;
+    padding-top: 15px;
+}
+
+.invoice-signature {
+    margin-top: 60px;
+    text-align: right;
+}
+
+.signature-label {
+    margin-bottom: 60px;
+    color: #666;
+}
+
+.signature-line {
+    border-top: 1px solid #333;
+    width: 200px;
+    margin-left: auto;
+}
+
+.button-group {
+    display: flex;
+    gap: 15px;
+}
+
+.btn-download,
+.btn-new {
+    flex: 1;
+    padding: 12px 30px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.btn-download {
+    background: #28a745;
+    color: white;
+}
+
+.btn-download:hover {
+    background: #218838;
+}
+
+.btn-new {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-new:hover {
+    background: #5a6268;
+}
+
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
     }
-    #invoice-container, #invoice-container * {
-        visibility: visible;
+
+    .container {
+        padding: 20px;
     }
-    #invoice-container {
-        position: absolute;
-        left: 0;
-        top: 0;
+
+    .product-inputs {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .product-total {
+        text-align: left;
+    }
+
+    #invoiceContent {
+        padding: 20px;
+    }
+
+    .invoice-header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .invoice-shop-info {
+        text-align: center;
+        margin-top: 15px;
+    }
+
+    .invoice-details {
+        flex-direction: column;
+    }
+
+    .invoice-meta {
+        text-align: left;
+        margin-top: 20px;
+    }
+
+    .invoice-summary {
         width: 100%;
-        margin: 0;
-        padding: 0;
-        box-shadow: none;
-        border: none !important;
     }
-    .no-print {
-        display: none !important;
+
+    .button-group {
+        flex-direction: column;
     }
 }
